@@ -57,7 +57,7 @@ class WebRequest(object):
         return {'User-Agent': self.user_agent,
                 'Accept': '*/*',
                 'Connection': 'keep-alive',
-                'Accept-Language': 'zh-CN,zh;q=0.8'}
+                'Accept-Language': 'en-US,en,zh-CN,zh;q=0.8'}
 
     def get(self, url, header=None, retry_time=3, retry_interval=5, timeout=5, *args, **kwargs):
         """

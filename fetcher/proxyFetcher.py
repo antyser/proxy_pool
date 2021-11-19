@@ -179,44 +179,44 @@ class ProxyFetcher(object):
                     continue
                 yield ":".join(tr.xpath("./td/text()")[0:2]).strip()
 
-    # @staticmethod
-    # def freeProxy10():
-    #     """
-    #     墙外网站 cn-proxy
-    #     :return:
-    #     """
-    #     urls = ['http://cn-proxy.com/', 'http://cn-proxy.com/archives/218']
-    #     request = WebRequest()
-    #     for url in urls:
-    #         r = request.get(url, timeout=10)
-    #         proxies = re.findall(r'<td>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})</td>[\w\W]<td>(\d+)</td>', r.text)
-    #         for proxy in proxies:
-    #             yield ':'.join(proxy)
+    @staticmethod
+    def freeProxy10():
+        """
+        墙外网站 cn-proxy
+        :return:
+        """
+        urls = ['http://cn-proxy.com/', 'http://cn-proxy.com/archives/218']
+        request = WebRequest()
+        for url in urls:
+            r = request.get(url, timeout=10)
+            proxies = re.findall(r'<td>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})</td>[\w\W]<td>(\d+)</td>', r.text)
+            for proxy in proxies:
+                yield ':'.join(proxy)
 
-    # @staticmethod
-    # def freeProxy11():
-    #     """
-    #     https://proxy-list.org/english/index.php
-    #     :return:
-    #     """
-    #     urls = ['https://proxy-list.org/english/index.php?p=%s' % n for n in range(1, 10)]
-    #     request = WebRequest()
-    #     import base64
-    #     for url in urls:
-    #         r = request.get(url, timeout=10)
-    #         proxies = re.findall(r"Proxy\('(.*?)'\)", r.text)
-    #         for proxy in proxies:
-    #             yield base64.b64decode(proxy).decode()
+    @staticmethod
+    def freeProxy11():
+        """
+        https://proxy-list.org/english/index.php
+        :return:
+        """
+        urls = ['https://proxy-list.org/english/index.php?p=%s' % n for n in range(1, 10)]
+        request = WebRequest()
+        import base64
+        for url in urls:
+            r = request.get(url, timeout=10)
+            proxies = re.findall(r"Proxy\('(.*?)'\)", r.text)
+            for proxy in proxies:
+                yield base64.b64decode(proxy).decode()
 
-    # @staticmethod
-    # def freeProxy12():
-    #     urls = ['https://list.proxylistplus.com/Fresh-HTTP-Proxy-List-1']
-    #     request = WebRequest()
-    #     for url in urls:
-    #         r = request.get(url, timeout=10)
-    #         proxies = re.findall(r'<td>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})</td>[\s\S]*?<td>(\d+)</td>', r.text)
-    #         for proxy in proxies:
-    #             yield ':'.join(proxy)
+    @staticmethod
+    def freeProxy12():
+        urls = ['https://list.proxylistplus.com/Fresh-HTTP-Proxy-List-1']
+        request = WebRequest()
+        for url in urls:
+            r = request.get(url, timeout=10)
+            proxies = re.findall(r'<td>(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})</td>[\s\S]*?<td>(\d+)</td>', r.text)
+            for proxy in proxies:
+                yield ':'.join(proxy)
 
     @staticmethod
     def freeProxy13(max_page=2):
@@ -249,6 +249,78 @@ class ProxyFetcher(object):
             ips = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,5}", r.text)
             for ip in ips:
                 yield ip.strip()
+
+    @staticmethod
+    def freeProxy15():
+        # two columns
+        # 'http://free-proxy.cz/en/proxylist/country/all/https/ping/all' regex doesn't work
+        urls = ['https://sslproxies.org/',
+                'https://free-proxy-list.net/',
+                'https://www.proxy-list.download/HTTPS',
+                'https://www.proxynova.com/proxy-server-list',
+                'https://hidemy.name/en/proxy-list/?type=s#list',
+                'https://hidemy.name/en/proxy-list/?type=s&start=64#list']
+        for url in urls:
+            r = WebRequest().get(url, timeout=10)
+            proxies = re.findall(
+                r'<td.*?>[\s\S]*?(\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3})[\s\S]*?</td>[\s\S]*?<td.*?>[\s\S]*?(\d+)[\s\S]*?</td>',
+                r.text)
+            for proxy in proxies:
+                yield ':'.join(proxy)
+
+    @staticmethod
+    def freeProxy16():
+        # text
+        urls = [
+            'https://api.proxyscrape.com/v2/?request=getproxies&protocol=http&timeout=10000&country=all&ssl=all&anonymity=all&simplified=true',
+            'https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks4&timeout=10000&country=all&simplified=true',
+            'https://api.proxyscrape.com/v2/?request=getproxies&protocol=socks5&timeout=10000&country=all']
+        result = []
+        for url in urls:
+            resp = WebRequest().get(url)
+            eps = resp.text.split('\r\n')
+            result += eps
+        for proxy in set(result):
+            yield proxy
+
+    @staticmethod
+    def freeProxy17():
+        r = WebRequest().get(
+            'https://proxylist.geonode.com/api/proxy-list?limit=500&page=1&sort_by=lastChecked&sort_type=desc&protocols=https').json()
+
+        result = []
+        for row in r['data']:
+            result.append(row['ip'] + ':' + row['port'])
+        for proxy in set(result):
+            yield proxy
+
+    @staticmethod
+    def freeProxy18():
+        urls = ['https://spys.one/en/https-ssl-proxy/', 'https://spys.one/free-proxy-list/US/',
+                'https://spys.one/free-proxy-list/ID/', 'https://spys.one/free-proxy-list/BR/']
+        for url in urls:
+            r = WebRequest().get(url, timeout=10)
+            ips = re.findall(r"\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}:\d{1,5}", r.text)
+            for ip in ips:
+                yield ip.strip()
+
+    @staticmethod
+    def freeProxy19():
+        urls = ['https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt',
+                'https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/http.txt',
+                'https://raw.githubusercontent.com/jetkai/proxy-list/main/online-proxies/txt/proxies-https.txt',
+                'https://raw.githubusercontent.com/clarketm/proxy-list/master/proxy-list-raw.txt']
+        result = []
+        for url in urls:
+            resp = WebRequest().get(url)
+            eps = resp.text.split('\n')
+            result += eps
+        for proxy in set(result):
+            yield proxy
+
+    @staticmethod
+    def freeProxy20():
+        url = 'https://openproxy.space/list'
 
 
 if __name__ == '__main__':
